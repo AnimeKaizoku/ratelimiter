@@ -28,3 +28,7 @@
 > Version:	v1.0.0					\
 > Edit:		12 Sep 2021				\
 > By:		ALiwoto and Contributors (C)	
+
+<hr/>
+
+NOTICE: this library is a work in progress and at the moment lacks documentations.
