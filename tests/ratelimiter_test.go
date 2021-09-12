@@ -11,6 +11,7 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/gotgbot/ratelimiter/ratelimiter"
 )
 
@@ -91,6 +92,15 @@ func loadHandlers(d *ext.Dispatcher) {
 	limiter := ratelimiter.NewLimiter(d)
 	limiter.SetTriggerFunc(limitedTrigger)
 
+	msgHandler := handlers.NewMessage(func(msg *gotgbot.Message) bool {
+		return true
+	}, func(b *gotgbot.Bot, ctx *ext.Context) error {
+		ctx.EffectiveMessage.Reply(b, "received text: "+ctx.EffectiveMessage.Text,
+			&gotgbot.SendMessageOpts{})
+		return nil
+	})
+
+	d.AddHandler(msgHandler)
 }
 
 func limitedTrigger(b *gotgbot.Bot, ctx *ext.Context) error {
