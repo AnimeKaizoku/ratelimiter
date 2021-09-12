@@ -24,6 +24,14 @@ func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
 		}
 	}
 
+	if len(l.conditions) != 0 {
+		for _, con := range l.conditions {
+			if !con(msg) {
+				return false
+			}
+		}
+	}
+
 	return !(l.IgnoreMediaGroup && msg.MediaGroupId != "")
 }
 
@@ -51,6 +59,17 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	if status.limited {
 		l.mutex.Unlock()
+		if time.Since(status.Last) > l.timeout+l.punishment {
+			status.count = 0
+			status.limited = false
+			status.Last = time.Now()
+			return ext.ContinueGroups
+		}
+
+		if l.IsStrict {
+			status.Last = time.Now()
+		}
+
 		return ext.EndGroups
 	}
 
@@ -62,6 +81,7 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	if status.count > l.maxCount {
 		status.limited = true
+		status.Last = time.Now()
 		l.mutex.Unlock()
 		if l.trigger != nil {
 			go l.trigger(b, ctx)
@@ -70,6 +90,7 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return ext.EndGroups
 	}
 
+	status.Last = time.Now()
 	l.mutex.Unlock()
 
 	return ext.ContinueGroups

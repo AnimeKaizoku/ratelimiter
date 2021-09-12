@@ -16,7 +16,7 @@ import (
 	"github.com/gotgbot/ratelimiter/ratelimiter"
 )
 
-const TEST_TIME_OUT = 29 * time.Second
+const TEST_TIME_OUT = 29 * time.Minute
 
 var testTimeout time.Duration
 
@@ -93,8 +93,9 @@ func TestRateLimiter(t *testing.T) {
 }
 
 func loadHandlers(d *ext.Dispatcher) {
-	limiter := ratelimiter.NewLimiter(d)
+	limiter := ratelimiter.NewLimiter(d, false, false)
 	limiter.SetTriggerFunc(limitedTrigger)
+	limiter.Start()
 
 	msgHandler := handlers.NewMessage(func(msg *gotgbot.Message) bool {
 		return true

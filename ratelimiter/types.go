@@ -48,12 +48,44 @@ type Limiter struct {
 	handler handlers.Response
 
 	exceptions   []filters.Message
+	conditions   []filters.Message
 	exceptionIDs []int64
 
-	timeout    time.Duration
-	maxTimeout time.Duration
-	maxCount   int
+	// timeout is the floodwait checking time. a user is allowed to
+	// send `maxCount` messages per `timeout`.
+	timeout time.Duration
 
+	// maxTimeout is the maxmimum time out of clearing user status
+	// cache in the memory.
+	maxTimeout time.Duration
+
+	// punishment is the necessary time a user needs to spend after
+	// being limiter as its punishment; the user will be freed after
+	// this time is passed.
+	punishment time.Duration
+
+	// maxCount is the maximum number of messages we can accept from the
+	// user in `timeout` amout of time; if the user sends more than
+	// this much message, it will be limited and so the bot will ignore
+	// their messages.
+	maxCount int
+
+	// IgnoreMediaGroup should be set to true when we have to ignore
+	// album messages (such as album musics, album photos, etc...) and
+	// don't check them at all.
 	IgnoreMediaGroup bool
-	ConsiderUser     bool
+
+	// IsStrict will tell the limiter whether it should act more strict
+	// or not. If this value is set to `true`, the user should NOT send
+	// any messages to the bot until it's limit time is completely over.
+	// otherwise the limitation will remain on the user until it stops
+	// sending any messages to the bot.
+	// (A truely bad way of handling antofloodwait... we recommend not to
+	// set this value to `true`, unless it's very very necessary).
+	IsStrict bool
+
+	// ConsiderUser will be true when the limiter needs to consider users
+	// for their checking the messages. so the user's ID will be used as key
+	// to access the map.
+	ConsiderUser bool
 }
