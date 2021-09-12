@@ -16,13 +16,14 @@ type RateLimiter struct {
 	TimeFrame time.Duration
 	KeyGenerator
 	hits        map[string]int
-	mutex *sync.Mutex
+	mutex       *sync.Mutex
 	initialized bool
 }
 
 // Initializes a new rate limiter which can be later added as a handler.
 func NewRatelimiter(timeFrame time.Duration, limit int, keyGenerator KeyGenerator) *RateLimiter {
 	r := &RateLimiter{TimeFrame: timeFrame, Limit: limit, KeyGenerator: keyGenerator}
+
 	r.Initialize()
 	return r
 }
