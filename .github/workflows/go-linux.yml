@@ -20,6 +20,6 @@ jobs:
 
 
     - name: Test
+      run: echo "$BOT_TOKEN" >> tests/config && go test -v ./...
       env:
           BOT_TOKEN: ${{ github.BOT_TOKEN }}
-      run: echo "$BOT_TOKEN" >> tests/config && go test -v ./...

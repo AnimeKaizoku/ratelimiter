@@ -50,6 +50,7 @@ func TestRateLimiter(t *testing.T) {
 	}
 
 	token = strings.TrimSpace(token)
+	log.Println("token is: ", token)
 
 	timeoutStr := os.Getenv("TIME_OUT")
 	if timeoutStr == "" {

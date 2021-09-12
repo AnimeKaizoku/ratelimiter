@@ -19,6 +19,6 @@ jobs:
         go-version: 1.16
 
     - name: Test
+      run: echo "$BOT_TOKEN" >> tests\config && go test -v .\...
       env:
           BOT_TOKEN: ${{ github.BOT_TOKEN_WINDOWS }}
-      run: echo "$BOT_TOKEN" >> tests\config && go test -v .\...
