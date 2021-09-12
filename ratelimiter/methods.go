@@ -266,3 +266,11 @@ func (l *Limiter) checker() {
 }
 
 //---------------------------------------------------------
+
+// IsLimited will check and see if the chat (or user) is
+// limited by this limiter or not.
+func (s *UserStatus) IsLimited() bool {
+	return s.limited
+}
+
+//---------------------------------------------------------
