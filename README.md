@@ -16,7 +16,7 @@
 -->
 
 
-# Rate Limiter - gotgbot
+# <p align="center"> Rate Limiter - gotgbot </p>
 
 <p align="center">
 	<a href="https://github.com/gotgbot/ratelimiter">
@@ -24,7 +24,7 @@
 	</a>
 </p>
 
-> Name:		SpamProtection-go	\
-> Version:	v1.0.4				\
-> Edit:		13 Jun 2021			\
-> By:		Intellivoid (C)	
+> Name:		Rate Limiter			\
+> Version:	v1.0.0					\
+> Edit:		12 Sep 2021				\
+> By:		ALiwoto and Contributors (C)	
