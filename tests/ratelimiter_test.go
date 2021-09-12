@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -47,6 +48,8 @@ func TestRateLimiter(t *testing.T) {
 
 		token = string(b)
 	}
+
+	token = strings.TrimSpace(token)
 
 	timeoutStr := os.Getenv("TIME_OUT")
 	if timeoutStr == "" {
