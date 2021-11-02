@@ -1,3 +1,8 @@
+// ratelimiter Project
+// Copyright (C) 2021 ALiwoto and other Contributors
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE', which is part of the source code.
+
 package ratelimiter
 
 import (
@@ -5,8 +10,12 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 )
 
-func NewLimiter(dispatcher *ext.Dispatcher,
-	channels, edits bool, tm ...int) *Limiter {
+// NewLimiter creates a new `Limiter` with the given dispatcher.
+// pass true for the second parameter if you want the limiter to check
+// messages in channels too.
+// pass true for the third parameter if you want the limiter to check
+// edited messages too.
+func NewLimiter(dispatcher *ext.Dispatcher, channels, edits bool) *Limiter {
 	l := new(Limiter)
 
 	l.filter = l.limiterFilter
@@ -17,14 +26,19 @@ func NewLimiter(dispatcher *ext.Dispatcher,
 	l.maxTimeout = DEFAULT_MAX_TIMEOUT
 	l.IgnoreMediaGroup = true
 
-	msgHandler := handlers.NewMessage(l.filter, l.handler)
-	msgHandler.AllowChannel = channels
-	msgHandler.AllowEdited = edits
+	h := handlers.NewMessage(l.filter, l.handler)
 
-	dispatcher.AddHandler(msgHandler)
+	l.msgHandler = &h
+	l.msgHandler.AllowChannel = channels
+	l.msgHandler.AllowEdited = edits
+
+	dispatcher.AddHandler(*l.msgHandler)
 	return l
 }
 
+// NewFullLimiter creates a new `Limiter` with the given dispatcher.
+// it will initialize a limiter which checks for messages received from
+// channels and edited messages.
 func NewFullLimiter(dispatcher *ext.Dispatcher) *Limiter {
 	return NewLimiter(dispatcher, true, true)
 }

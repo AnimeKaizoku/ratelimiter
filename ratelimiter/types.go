@@ -1,3 +1,8 @@
+// ratelimiter Project
+// Copyright (C) 2021 ALiwoto and other Contributors
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE', which is part of the source code.
+
 package ratelimiter
 
 import (
@@ -41,11 +46,15 @@ type Limiter struct {
 	// by the limiter. It should be set by user, users can do everything
 	// they want in this function, such as logging the person's id who
 	// has been limited by the limiter, etc...
-	trigger handlers.Response
+	triggers []handlers.Response
 
 	filter filters.Message
 
 	handler handlers.Response
+
+	// msgHandler is the original message handler of this limiter.
+	// it should remain private.
+	msgHandler *handlers.Message
 
 	exceptions   []filters.Message
 	conditions   []filters.Message
@@ -73,7 +82,15 @@ type Limiter struct {
 	// IgnoreMediaGroup should be set to true when we have to ignore
 	// album messages (such as album musics, album photos, etc...) and
 	// don't check them at all.
+	// default value for this field is true.
 	IgnoreMediaGroup bool
+
+	// TextOnly should be set to true when we have to ignore
+	// media messages (such as photos, videos, audios, etc...) and
+	// don't check them at all.
+	// If your bot has nothing to do with media messages, you can set
+	// this to true.
+	TextOnly bool
 
 	// IsStrict will tell the limiter whether it should act more strict
 	// or not. If this value is set to `true`, the user should NOT send

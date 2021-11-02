@@ -1,3 +1,33 @@
+# ratelimiter Project
+# Copyright (C) 2021 ALiwoto and other Contributors
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE', which is part of the source code.
+
+
 # ignore experimental directories
 woto_files/
-config
+
+
+.env
+.docker_build/
+bin/
+*.exe
+vendor/
+sibylSystem
+*.old.go
+tmp_files/
+labs/
+*.old.go
+*.db
+*.log
+
+# ignore debug binary file
+*.dbg
+*.dmp
+__debug_bin
+__debug_test
+
+# ignore config file
+config.ini
+*.token
+

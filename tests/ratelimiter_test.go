@@ -1,3 +1,8 @@
+// ratelimiter Project
+// Copyright (C) 2021 ALiwoto and other Contributors
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE', which is part of the source code.
+
 package tests
 
 import (
@@ -94,7 +99,7 @@ func TestRateLimiter(t *testing.T) {
 
 func loadHandlers(d *ext.Dispatcher) {
 	limiter := ratelimiter.NewLimiter(d, false, false)
-	limiter.SetTriggerFunc(limitedTrigger)
+	limiter.SetTriggerFuncs(limitedTrigger)
 	limiter.Start()
 
 	msgHandler := handlers.NewMessage(func(msg *gotgbot.Message) bool {

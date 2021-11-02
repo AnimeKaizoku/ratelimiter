@@ -1,3 +1,8 @@
+// ratelimiter Project
+// Copyright (C) 2021 ALiwoto and other Contributors
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE', which is part of the source code.
+
 package ratelimiter
 
 import (
@@ -8,7 +13,7 @@ import (
 )
 
 func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
-	if !l.isEnabled || l.isStopped {
+	if !l.isEnabled || l.isStopped || !l.hasTextCondition(msg) {
 		return false
 	}
 
@@ -32,7 +37,7 @@ func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
 		}
 	}
 
-	return !(l.IgnoreMediaGroup && msg.MediaGroupId != "")
+	return !(l.IgnoreMediaGroup && len(msg.MediaGroupId) != 0)
 }
 
 func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -83,8 +88,10 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		status.limited = true
 		status.Last = time.Now()
 		l.mutex.Unlock()
-		if l.trigger != nil {
-			go l.trigger(b, ctx)
+		// check for triggers length to prevent from creating
+		// a new goroutine in the case we have no triggers.
+		if len(l.triggers) != 0 {
+			go l.runTriggers(b, ctx)
 		}
 
 		return ext.EndGroups

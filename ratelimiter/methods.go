@@ -1,3 +1,8 @@
+// ratelimiter Project
+// Copyright (C) 2021 ALiwoto and other Contributors
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE', which is part of the source code.
+
 package ratelimiter
 
 import (
@@ -5,6 +10,7 @@ import (
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
 )
@@ -78,8 +84,8 @@ func (l *Limiter) IsEnabled() bool {
 // The trigger function will be triggered when the limiter
 // limits a user. The information passed by it will be the
 // information related to the last message of the user.
-func (l *Limiter) SetTriggerFunc(t handlers.Response) {
-	l.trigger = t
+func (l *Limiter) SetTriggerFuncs(t ...handlers.Response) {
+	l.triggers = t
 }
 
 // AddException will add an exception filter to this limiter.
@@ -98,6 +104,37 @@ func (l *Limiter) ClearAllExceptions() {
 // its exceptions list.
 func (l *Limiter) GetExceptions() []filters.Message {
 	return l.exceptions
+}
+
+// IsTextOnly will return true if and only if this limiter is
+// checking for text-only messages.
+func (l *Limiter) IsTextOnly() bool {
+	return l.TextOnly
+}
+
+// SetTextOnly will set the limiter to check for text-only messages.
+// pass true to this method to make the limiter check for text-only
+// messages.
+func (l *Limiter) SetTextOnly(t bool) {
+	l.TextOnly = t
+}
+
+// IsAllowingChannels will return true if and only if this limiter
+// is checking for messages from channels.
+func (l *Limiter) IsAllowingChannels() bool {
+	if l.msgHandler == nil {
+		return false
+	}
+	return l.msgHandler.AllowChannel
+}
+
+// IsAllowingEdits will return true if and only if this limiter
+// is checking for "edited message" update from telegram.
+func (l *Limiter) IsAllowingEdits() bool {
+	if l.msgHandler == nil {
+		return false
+	}
+	return l.msgHandler.AllowEdited
 }
 
 // AddExceptionID will add a group/user/channel ID to the exception
@@ -209,9 +246,38 @@ func (l *Limiter) SetMaxMessageCount(count int) {
 	l.maxCount = count
 }
 
-// SetMaxCacheDuration will set the max duration
+// SetMaxCacheDuration will set the max duration for caching algorithm.
+// WARNING: this value should always be greater than the
+// `timeout` + `punishment` values of the limiter;
+// otherwise this method will set the max cache duration to
+// `timeout` + `punishment` + 1.
 func (l *Limiter) SetMaxCacheDuration(d time.Duration) {
-	l.maxTimeout = d
+	if d > l.punishment+l.timeout {
+		l.maxTimeout = d
+	} else {
+		l.maxTimeout = l.punishment + l.timeout + time.Minute
+	}
+}
+
+// hasTextCondition will check if the message meets the message condition
+// or not.
+// basically if l.TextOnly is set to true, this method will check if
+// the message is a normal text message or not.
+func (l *Limiter) hasTextCondition(msg *gotgbot.Message) bool {
+	if l.TextOnly {
+		return len(msg.Text) > 0
+	}
+	return true
+}
+
+// runTriggers will run the triggers of the limiter.
+// this method should be called in a separate goroutine.
+func (l *Limiter) runTriggers(b *gotgbot.Bot, ctx *ext.Context) {
+	for _, trigger := range l.triggers {
+		if trigger != nil {
+			trigger(b, ctx)
+		}
+	}
 }
 
 // isException will check and see if msg can be ignore because
@@ -248,6 +314,8 @@ func (l *Limiter) checker() {
 		// added this checker just in-case so we can
 		// prevent the panics in the future.
 		if l.userMap == nil || l.mutex == nil {
+			// return from the cleaner function and let the
+			// goroutine die.
 			return
 		}
 
@@ -257,7 +325,7 @@ func (l *Limiter) checker() {
 
 		l.mutex.Lock()
 		for key, value := range l.userMap {
-			if time.Since(value.Last) > l.timeout {
+			if value == nil || time.Since(value.Last) > l.timeout {
 				delete(l.userMap, key)
 			}
 		}
