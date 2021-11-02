@@ -80,12 +80,34 @@ func (l *Limiter) IsEnabled() bool {
 	return l.isEnabled
 }
 
-// SetTriggerFunc will set the trigger function of this limiter.
-// The trigger function will be triggered when the limiter
+// SetTriggerFuncs will set the trigger functions of this limiter.
+// The trigger functions will be triggered when the limiter
 // limits a user. The information passed by it will be the
 // information related to the last message of the user.
 func (l *Limiter) SetTriggerFuncs(t ...handlers.Response) {
 	l.triggers = t
+}
+
+// SetTriggerFunc will set the trigger function of this limiter.
+// The trigger function will be triggered when the limiter
+// limits a user. The information passed by it will be the
+// information related to the last message of the user.
+// If you want to set more than one trigger function, use
+// `SetTriggerFuncs` method.
+func (l *Limiter) SetTriggerFunc(t handlers.Response) {
+	l.SetTriggerFuncs(t)
+}
+
+// AppendTriggerFuncs will append trigger functions to the trigger
+// functions list of this limiter.
+func (l *Limiter) AppendTriggerFuncs(t ...handlers.Response) {
+	l.triggers = append(l.triggers, t...)
+}
+
+// AppendTriggerFunc will append a trigger function to the trigger
+// functions list of this limiter.
+func (l *Limiter) AppendTriggerFunc(t handlers.Response) {
+	l.triggers = append(l.triggers, t)
 }
 
 // AddException will add an exception filter to this limiter.
