@@ -379,7 +379,7 @@ func (l *Limiter) checker() {
 
 		l.mutex.Lock()
 		for key, value := range l.userMap {
-			if value == nil || time.Since(value.Last) > l.timeout {
+			if value == nil || value.canBeDeleted(l) {
 				delete(l.userMap, key)
 			}
 		}
@@ -400,12 +400,16 @@ func (s *UserStatus) IsCustomLimited() bool {
 		return false
 	}
 
-	if time.Since(s.custom.startTime) > s.custom.duration {
+	if time.Since(s.custom.startTime) > s.custom.duration && s.custom.duration != 0 {
 		s.custom = nil
 		return false
 	}
 
 	return true
+}
+
+func (s *UserStatus) canBeDeleted(l *Limiter) bool {
+	return time.Since(s.Last) > l.timeout && !s.limited && !s.IsCustomLimited()
 }
 
 //---------------------------------------------------------

@@ -59,6 +59,12 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		status.count++
 		l.userMap[id] = status
 		l.mutex.Unlock()
+		if status.IsCustomLimited() {
+			if !status.custom.ignoreException && l.isException(ctx.Message) {
+				return ext.ContinueGroups
+			}
+			return ext.EndGroups
+		}
 		return ext.ContinueGroups
 	}
 
