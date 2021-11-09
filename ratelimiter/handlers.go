@@ -97,8 +97,15 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return ext.EndGroups
 	}
 
-	status.Last = time.Now()
 	l.mutex.Unlock()
+	status.Last = time.Now()
+
+	if status.IsCustomLimited() {
+		if !status.custom.ignoreException && l.isException(ctx.Message) {
+			return ext.ContinueGroups
+		}
+		return ext.EndGroups
+	}
 
 	return ext.ContinueGroups
 }

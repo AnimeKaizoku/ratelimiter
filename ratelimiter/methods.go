@@ -260,7 +260,7 @@ func (l *Limiter) SetPunishmentDuration(d time.Duration) {
 }
 
 // SetMaxMessageCount sets the possible messages count in the
-// antifloodwait amout of time (which is `l.timeout`).
+// antifloodwait amount of time (which is `l.timeout`).
 // in that period of time, chat (or user) needs to send less than
 // this much message, otherwise they will be limited by this limiter
 // and so as a result of that their messages will be ignored by the bot.
@@ -279,6 +279,38 @@ func (l *Limiter) SetMaxCacheDuration(d time.Duration) {
 	} else {
 		l.maxTimeout = l.punishment + l.timeout + time.Minute
 	}
+}
+
+func (l *Limiter) AddCustomIgnore(id int64, d time.Duration, ignoreExceptions bool) {
+	l.mutex.Lock()
+	status := l.userMap[id]
+	if status == nil {
+		status = new(UserStatus)
+		status.custom = &customIgnore{
+			startTime:       time.Now(),
+			duration:        d,
+			ignoreException: ignoreExceptions,
+		}
+		l.userMap[id] = status
+		l.mutex.Unlock()
+		return
+	}
+	l.mutex.Unlock()
+	status.custom = &customIgnore{
+		startTime:       time.Now(),
+		duration:        d,
+		ignoreException: ignoreExceptions,
+	}
+}
+
+func (l *Limiter) RemoveCustomIgnore(id int64) {
+	l.mutex.Lock()
+	status := l.userMap[id]
+	l.mutex.Unlock()
+	if status == nil {
+		return
+	}
+	status.custom = nil
 }
 
 // hasTextCondition will check if the message meets the message condition
@@ -361,6 +393,19 @@ func (l *Limiter) checker() {
 // limited by this limiter or not.
 func (s *UserStatus) IsLimited() bool {
 	return s.limited
+}
+
+func (s *UserStatus) IsCustomLimited() bool {
+	if s.custom == nil {
+		return false
+	}
+
+	if time.Since(s.custom.startTime) > s.custom.duration {
+		s.custom = nil
+		return false
+	}
+
+	return true
 }
 
 //---------------------------------------------------------

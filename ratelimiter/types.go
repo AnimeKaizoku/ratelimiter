@@ -26,13 +26,21 @@ type UserStatus struct {
 	// count is the counts of the messages of the user received
 	// by limiter.
 	count int
+
+	custom *customIgnore
+}
+
+type customIgnore struct {
+	startTime       time.Time
+	duration        time.Duration
+	ignoreException bool
 }
 
 // Limiter is the main struct of this library.
 type Limiter struct {
 	mutex *sync.Mutex
 	// IsEnable will be true if and only if the limiter is enabled
-	// and should check for the incomming messages.
+	// and should check for the incoming messages.
 	isEnabled bool
 
 	// IsStopped will be false when the limiter is stopped.
@@ -64,7 +72,7 @@ type Limiter struct {
 	// send `maxCount` messages per `timeout`.
 	timeout time.Duration
 
-	// maxTimeout is the maxmimum time out of clearing user status
+	// maxTimeout is the maximum time out of clearing user status
 	// cache in the memory.
 	maxTimeout time.Duration
 
@@ -74,7 +82,7 @@ type Limiter struct {
 	punishment time.Duration
 
 	// maxCount is the maximum number of messages we can accept from the
-	// user in `timeout` amout of time; if the user sends more than
+	// user in `timeout` amount of time; if the user sends more than
 	// this much message, it will be limited and so the bot will ignore
 	// their messages.
 	maxCount int
@@ -97,7 +105,7 @@ type Limiter struct {
 	// any messages to the bot until it's limit time is completely over.
 	// otherwise the limitation will remain on the user until it stops
 	// sending any messages to the bot.
-	// (A truely bad way of handling antofloodwait... we recommend not to
+	// (A truly bad way of handling antifloodwait... we recommend not to
 	// set this value to `true`, unless it's very very necessary).
 	IsStrict bool
 
