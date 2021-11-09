@@ -64,9 +64,10 @@ type Limiter struct {
 	// it should remain private.
 	msgHandler *handlers.Message
 
-	exceptions   []filters.Message
-	conditions   []filters.Message
-	exceptionIDs []int64
+	exceptions        []filters.Message
+	conditions        []filters.Message
+	exceptionIDs      []int64
+	ignoredExceptions []int64
 
 	// timeout is the floodwait checking time. a user is allowed to
 	// send `maxCount` messages per `timeout`.

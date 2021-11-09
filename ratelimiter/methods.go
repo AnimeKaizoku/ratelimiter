@@ -293,6 +293,9 @@ func (l *Limiter) AddCustomIgnore(id int64, d time.Duration, ignoreExceptions bo
 		}
 		l.userMap[id] = status
 		l.mutex.Unlock()
+		if ignoreExceptions {
+			l.addIgnoredExceptions(id)
+		}
 		return
 	}
 	l.mutex.Unlock()
@@ -301,14 +304,21 @@ func (l *Limiter) AddCustomIgnore(id int64, d time.Duration, ignoreExceptions bo
 		duration:        d,
 		ignoreException: ignoreExceptions,
 	}
+	if ignoreExceptions {
+		l.addIgnoredExceptions(id)
+	}
 }
 
 func (l *Limiter) RemoveCustomIgnore(id int64) {
 	l.mutex.Lock()
 	status := l.userMap[id]
 	l.mutex.Unlock()
-	if status == nil {
+	if status == nil || status.custom == nil {
 		return
+	}
+
+	if status.custom.ignoreException {
+		l.removeFromIgnoredExceptions(id)
 	}
 	status.custom = nil
 }
@@ -334,7 +344,7 @@ func (l *Limiter) runTriggers(b *gotgbot.Bot, ctx *ext.Context) {
 	}
 }
 
-// isException will check and see if msg can be ignore because
+// isException will check and see if msg can be ignored because
 // it's id is in the exception list or not. This method's usage
 // is internal-only.
 func (l *Limiter) isException(msg *gotgbot.Message) bool {
@@ -356,6 +366,54 @@ func (l *Limiter) isException(msg *gotgbot.Message) bool {
 	}
 
 	return false
+}
+
+// isIgnoredException will check and see if msg cannot be ignored because
+// it's id is in the exception list or not. This method's usage
+// is internal-only.
+func (l *Limiter) isIgnoredException(msg *gotgbot.Message) bool {
+	if len(l.ignoredExceptions) == 0 {
+		return false
+	}
+
+	for _, ex := range l.ignoredExceptions {
+		if msg.From != nil {
+			if ex == msg.From.Id || ex == msg.Chat.Id {
+				return true
+			}
+		} else {
+			if ex == msg.Chat.Id {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (l *Limiter) addIgnoredExceptions(id int64) {
+	if len(l.ignoredExceptions) == 0 {
+		l.ignoredExceptions = append(l.ignoredExceptions, id)
+		return
+	}
+	for _, ex := range l.ignoredExceptions {
+		if ex == id {
+			return
+		}
+	}
+	l.ignoredExceptions = append(l.ignoredExceptions, id)
+}
+
+func (l *Limiter) removeFromIgnoredExceptions(id int64) {
+	if len(l.ignoredExceptions) == 0 {
+		return
+	}
+	for i, ex := range l.ignoredExceptions {
+		if ex == id {
+			l.ignoredExceptions = append(l.ignoredExceptions[:i], l.ignoredExceptions[i+1:]...)
+			return
+		}
+	}
 }
 
 // checker should be run in a new goroutine as it blocks its goroutine

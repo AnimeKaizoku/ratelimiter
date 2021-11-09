@@ -17,6 +17,10 @@ func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
 		return false
 	}
 
+	if l.isIgnoredException(msg) {
+		return true
+	}
+
 	if l.isException(msg) {
 		return false
 	}
