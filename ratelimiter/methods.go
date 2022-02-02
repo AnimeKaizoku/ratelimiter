@@ -348,7 +348,7 @@ func (l *Limiter) runTriggers(b *gotgbot.Bot, ctx *ext.Context) {
 // it's id is in the exception list or not. This method's usage
 // is internal-only.
 func (l *Limiter) isException(msg *gotgbot.Message) bool {
-	if len(l.exceptionIDs) == 0 {
+	if len(l.exceptionIDs) == 0 || msg == nil {
 		return false
 	}
 
@@ -368,11 +368,18 @@ func (l *Limiter) isException(msg *gotgbot.Message) bool {
 	return false
 }
 
+func (l *Limiter) isExceptionCtx(ctx *ext.Context) bool {
+	if ctx.CallbackQuery != nil {
+		return l.isExceptionQuery(ctx.CallbackQuery)
+	}
+	return l.isException(ctx.Message)
+}
+
 // isException will check and see if msg can be ignored because
 // it's id is in the exception list or not. This method's usage
 // is internal-only.
 func (l *Limiter) isExceptionQuery(cq *gotgbot.CallbackQuery) bool {
-	if len(l.exceptionIDs) == 0 {
+	if len(l.exceptionIDs) == 0 || cq == nil {
 		return false
 	}
 

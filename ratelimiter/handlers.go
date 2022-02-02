@@ -79,7 +79,7 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		l.userMap[id] = status
 		l.mutex.Unlock()
 		if status.IsCustomLimited() {
-			if !status.custom.ignoreException && l.isException(ctx.Message) {
+			if !status.custom.ignoreException && l.isExceptionCtx(ctx) {
 				return ext.ContinueGroups
 			}
 			return ext.EndGroups
@@ -107,7 +107,7 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		status.count = 0
 	}
 
-	if !l.isException(ctx.Message) {
+	if !l.isExceptionCtx(ctx) {
 		status.count++
 	}
 
@@ -128,7 +128,7 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	status.Last = time.Now()
 
 	if status.IsCustomLimited() {
-		if !status.custom.ignoreException && l.isException(ctx.Message) {
+		if !status.custom.ignoreException && l.isExceptionCtx(ctx) {
 			return ext.ContinueGroups
 		}
 		return ext.EndGroups
