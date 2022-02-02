@@ -12,6 +12,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
 
+// limiterFilter is the filter method for message types.
 func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
 	if !l.isEnabled || l.isStopped || !l.hasTextCondition(msg) {
 		return false
@@ -44,6 +45,7 @@ func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
 	return true
 }
 
+// callbackFilter is the filter method for callback queries.
 func (l *Limiter) callbackFilter(cq *gotgbot.CallbackQuery) bool {
 	if !l.isEnabled || l.isStopped || !l.ConsiderInline {
 		return false
@@ -56,6 +58,7 @@ func (l *Limiter) callbackFilter(cq *gotgbot.CallbackQuery) bool {
 	return true
 }
 
+// limiterHandler is the main handler method.
 func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	var status *UserStatus
 	var id int64

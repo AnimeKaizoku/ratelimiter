@@ -122,6 +122,7 @@ type Limiter struct {
 	ConsiderInline bool
 }
 
+// LimiterConfig is the config type of the limiter.
 type LimiterConfig struct {
 	ConsiderChannel  bool
 	ConsiderUser     bool
