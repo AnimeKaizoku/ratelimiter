@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters"
 )
@@ -64,6 +65,8 @@ type Limiter struct {
 	// it should remain private.
 	msgHandler *handlers.Message
 
+	allHandlers []ext.Handler
+
 	exceptions        []filters.Message
 	conditions        []filters.Message
 	exceptionIDs      []int64
@@ -114,4 +117,18 @@ type Limiter struct {
 	// for their checking the messages. so the user's ID will be used as key
 	// to access the map.
 	ConsiderUser bool
+
+	// ConsiderInline fields will determine whether we need to
+	ConsiderInline bool
+}
+
+type LimiterConfig struct {
+	ConsiderChannel  bool
+	ConsiderUser     bool
+	ConsiderEdits    bool
+	IgnoreMediaGroup bool
+	TextOnly         bool
+	IsStrict         bool
+	HandlerGroups    []int
+	ConsiderInline   bool
 }

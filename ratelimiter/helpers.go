@@ -15,8 +15,20 @@ import (
 // messages in channels too.
 // pass true for the third parameter if you want the limiter to check
 // edited messages too.
-func NewLimiter(dispatcher *ext.Dispatcher, channels, edits bool) *Limiter {
+func NewLimiter(dispatcher *ext.Dispatcher, config *LimiterConfig) *Limiter {
 	l := new(Limiter)
+
+	if config == nil {
+		config = &LimiterConfig{
+			ConsiderChannel:  false,
+			ConsiderUser:     true,
+			ConsiderEdits:    false,
+			IgnoreMediaGroup: true,
+			TextOnly:         false,
+			ConsiderInline:   true,
+			IsStrict:         false,
+		}
+	}
 
 	l.filter = l.limiterFilter
 	l.handler = l.limiterHandler
@@ -24,15 +36,31 @@ func NewLimiter(dispatcher *ext.Dispatcher, channels, edits bool) *Limiter {
 	l.punishment = DEFAULT_PUNISHMENT
 	l.maxCount = DEFAULT_COUNT
 	l.maxTimeout = DEFAULT_MAX_TIMEOUT
-	l.IgnoreMediaGroup = true
+	l.IgnoreMediaGroup = config.IgnoreMediaGroup
+	l.TextOnly = config.TextOnly
+	l.ConsiderUser = config.ConsiderUser
+	l.ConsiderInline = config.ConsiderInline
+	l.IsStrict = config.IsStrict
 
 	h := handlers.NewMessage(l.filter, l.handler)
+	cb := handlers.NewCallback(l.callbackFilter, l.handler)
 
 	l.msgHandler = &h
-	l.msgHandler.AllowChannel = channels
-	l.msgHandler.AllowEdited = edits
+	l.msgHandler.AllowChannel = config.ConsiderChannel
+	l.msgHandler.AllowEdited = config.ConsiderEdits
 
-	dispatcher.AddHandler(*l.msgHandler)
+	l.allHandlers = append(l.allHandlers, h, cb)
+
+	for _, currentHandler := range l.allHandlers {
+		if len(config.HandlerGroups) != 0 {
+			for _, current := range config.HandlerGroups {
+				dispatcher.AddHandlerToGroup(currentHandler, current)
+			}
+		} else {
+			dispatcher.AddHandler(currentHandler)
+		}
+	}
+
 	return l
 }
 
@@ -40,5 +68,13 @@ func NewLimiter(dispatcher *ext.Dispatcher, channels, edits bool) *Limiter {
 // it will initialize a limiter which checks for messages received from
 // channels and edited messages.
 func NewFullLimiter(dispatcher *ext.Dispatcher) *Limiter {
-	return NewLimiter(dispatcher, true, true)
+	return NewLimiter(dispatcher, &LimiterConfig{
+		ConsiderChannel:  true,
+		ConsiderUser:     true,
+		ConsiderEdits:    true,
+		IgnoreMediaGroup: false,
+		TextOnly:         false,
+		IsStrict:         false,
+		ConsiderInline:   true,
+	})
 }

@@ -368,6 +368,23 @@ func (l *Limiter) isException(msg *gotgbot.Message) bool {
 	return false
 }
 
+// isException will check and see if msg can be ignored because
+// it's id is in the exception list or not. This method's usage
+// is internal-only.
+func (l *Limiter) isExceptionQuery(cq *gotgbot.CallbackQuery) bool {
+	if len(l.exceptionIDs) == 0 {
+		return false
+	}
+
+	for _, ex := range l.exceptionIDs {
+		if ex == cq.From.Id || (cq.Message != nil && ex == cq.Message.Chat.Id) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // isIgnoredException will check and see if msg cannot be ignored because
 // it's id is in the exception list or not. This method's usage
 // is internal-only.
@@ -385,6 +402,23 @@ func (l *Limiter) isIgnoredException(msg *gotgbot.Message) bool {
 			if ex == msg.Chat.Id {
 				return true
 			}
+		}
+	}
+
+	return false
+}
+
+// isIgnoredException will check and see if msg cannot be ignored because
+// it's id is in the exception list or not. This method's usage
+// is internal-only.
+func (l *Limiter) isIgnoredExceptionQuery(cq *gotgbot.CallbackQuery) bool {
+	if len(l.ignoredExceptions) == 0 {
+		return false
+	}
+
+	for _, ex := range l.ignoredExceptions {
+		if ex == cq.From.Id || (cq.Message != nil && ex == cq.Message.Chat.Id) {
+			return true
 		}
 	}
 

@@ -98,7 +98,13 @@ func TestRateLimiter(t *testing.T) {
 }
 
 func loadHandlers(d *ext.Dispatcher) {
-	limiter := ratelimiter.NewLimiter(d, false, false)
+	limiter := ratelimiter.NewLimiter(d, &ratelimiter.LimiterConfig{
+		ConsiderChannel:  false,
+		ConsiderUser:     true,
+		ConsiderEdits:    false,
+		IgnoreMediaGroup: true,
+		TextOnly:         false,
+	})
 	limiter.SetTriggerFuncs(limitedTrigger)
 	limiter.Start()
 

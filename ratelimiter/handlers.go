@@ -17,11 +17,11 @@ func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
 		return false
 	}
 
-	if l.isIgnoredException(msg) {
-		return true
+	if l.IgnoreMediaGroup && len(msg.MediaGroupId) != 0 {
+		return false
 	}
 
-	if l.isException(msg) {
+	if l.isException(msg) && !l.isIgnoredException(msg) {
 		return false
 	}
 
@@ -41,7 +41,19 @@ func (l *Limiter) limiterFilter(msg *gotgbot.Message) bool {
 		}
 	}
 
-	return !(l.IgnoreMediaGroup && len(msg.MediaGroupId) != 0)
+	return true
+}
+
+func (l *Limiter) callbackFilter(cq *gotgbot.CallbackQuery) bool {
+	if !l.isEnabled || l.isStopped || !l.ConsiderInline {
+		return false
+	}
+
+	if l.isExceptionQuery(cq) && !l.isIgnoredExceptionQuery(cq) {
+		return false
+	}
+
+	return true
 }
 
 func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -92,7 +104,9 @@ func (l *Limiter) limiterHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		status.count = 0
 	}
 
-	status.count++
+	if !l.isException(ctx.Message) {
+		status.count++
+	}
 
 	if status.count > l.maxCount {
 		status.limited = true
