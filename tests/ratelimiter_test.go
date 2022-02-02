@@ -104,6 +104,7 @@ func loadHandlers(d *ext.Dispatcher) {
 		ConsiderEdits:    false,
 		IgnoreMediaGroup: true,
 		TextOnly:         false,
+		HandlerGroups:    []int{0, 1, 2},
 	})
 	limiter.SetTriggerFuncs(limitedTrigger)
 	limiter.Start()

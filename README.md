@@ -25,8 +25,8 @@
 </p>
 
 > Name:		Rate Limiter			\
-> Version:	v1.0.0					\
-> Edit:		12 Sep 2021				\
+> Version:	v1.0.6					\
+> Edit:		2 Feb 2021				\
 > By:		ALiwoto and Contributors (C)	
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/gotgbot/ratelimiter.svg)](https://pkg.go.dev/github.com/gotgbot/ratelimiter) [![Go-linux](https://github.com/gotgbot/ratelimiter/actions/workflows/go-linux.yml/badge.svg)](https://github.com/gotgbot/ratelimiter/actions/workflows/go-linux.yml) [![Go-macos](https://github.com/gotgbot/ratelimiter/actions/workflows/go-macos.yml/badge.svg)](https://github.com/gotgbot/ratelimiter/actions/workflows/go-macos.yml) [![Go-windows](https://github.com/gotgbot/ratelimiter/actions/workflows/go-windows.yml/badge.svg)](https://github.com/gotgbot/ratelimiter/actions/workflows/go-windows.yml)
@@ -46,16 +46,24 @@ func loadLimiter(d *ext.Dispatcher) {
 		ConsiderEdits:    false,
 		IgnoreMediaGroup: true,
 		TextOnly:         false,
+		HandlerGroups:    []int{0, 1, 2},
 	})
 
 	// 14 messages per 6 seconds
 	limiter.SetFloodWaitTime(6 * time.Second)
 	limiter.SetMaxMessageCount(14)
 
-	// add sudo users as exceptions, so they don't get rate-limited by library.
+	// add sudo users as exceptions, so they don't get rate-limited by library
 	limiter.AddExceptionID(sudoUsers...)
 
-	kv.KigCore.Limiter.Start()
+	limiter.Start()
 }
 ```
+
+<hr/>
+
+## Helpful links:
+
+- [Support group on telegram](https://t.me/KaizokuBots)
+- [Contact maintainer on telegram](https://t.me/Falling_inside_The_Black)
 
