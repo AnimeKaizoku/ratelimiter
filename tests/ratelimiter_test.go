@@ -70,9 +70,10 @@ func TestRateLimiter(t *testing.T) {
 	}
 
 	bot, err := gotgbot.NewBot(token, &gotgbot.BotOpts{
-		Client:      http.Client{},
-		GetTimeout:  gotgbot.DefaultGetTimeout,
-		PostTimeout: gotgbot.DefaultPostTimeout,
+		Client: http.Client{},
+		DefaultRequestOpts: &gotgbot.RequestOpts{
+			Timeout: 6 * gotgbot.DefaultTimeout,
+		},
 	})
 	if err != nil {
 		t.Errorf("failed to create a new bot instance: %v", err)
