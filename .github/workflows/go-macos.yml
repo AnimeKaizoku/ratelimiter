@@ -1,0 +1,30 @@
+# ratelimiter Project
+# Copyright (C) 2021~2022 ALiwoto and other Contributors
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE', which is part of the source code.
+
+name: Go-macos
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
