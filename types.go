@@ -51,7 +51,7 @@ type Limiter struct {
 	// as its key (int64).
 	userMap map[int64]*UserStatus
 
-	// trigger function will be runned when a user is limited
+	// trigger function will run when a user is limited
 	// by the limiter. It should be set by user, users can do everything
 	// they want in this function, such as logging the person's id who
 	// has been limited by the limiter, etc...
@@ -109,7 +109,7 @@ type Limiter struct {
 	// any messages to the bot until it's limit time is completely over.
 	// otherwise the limitation will remain on the user until it stops
 	// sending any messages to the bot.
-	// (A truly bad way of handling antifloodwait... we recommend not to
+	// (A truly bad way of handling anti-floodwait... we recommend not to
 	// set this value to `true`, unless it's very very necessary).
 	IsStrict bool
 

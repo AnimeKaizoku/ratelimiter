@@ -57,7 +57,7 @@ func (l *Limiter) Stop() {
 	// make sure that mutex is not nil.
 	if l.mutex != nil {
 		// let another goroutines let go of the mutex;
-		// if you set the usermap value to nil out of nowhere
+		// if you set the userMap value to nil out of nowhere
 		// it MAY cause some troubles.
 		l.mutex.Lock()
 		l.userMap = nil
@@ -167,7 +167,7 @@ func (l *Limiter) AddExceptionID(id ...int64) {
 
 // AddCondition will add a condition to be checked by this limiter,
 // if this condition doesn't return true, the limiter won't check
-// the message for antifloodwait.
+// the message for anti-flood-wait.
 func (l *Limiter) AddCondition(condition filters.Message) {
 	l.conditions = append(l.conditions, condition)
 }
@@ -197,9 +197,9 @@ func (l *Limiter) ClearAllExceptionIDs() {
 	l.exceptionIDs = nil
 }
 
-// IsInExcpetionList will check and see if an ID is in the
+// IsInExceptionList will check and see if an ID is in the
 // exception list of the listener or not.
-func (l *Limiter) IsInExcpetionList(id int64) bool {
+func (l *Limiter) IsInExceptionList(id int64) bool {
 	if len(l.exceptionIDs) == 0 {
 		return false
 	}
@@ -260,7 +260,7 @@ func (l *Limiter) SetPunishmentDuration(d time.Duration) {
 }
 
 // SetMaxMessageCount sets the possible messages count in the
-// antifloodwait amount of time (which is `l.timeout`).
+// anti-flood-wait amount of time (which is `l.timeout`).
 // in that period of time, chat (or user) needs to send less than
 // this much message, otherwise they will be limited by this limiter
 // and so as a result of that their messages will be ignored by the bot.
