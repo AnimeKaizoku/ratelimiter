@@ -19,23 +19,15 @@ func NewLimiter(dispatcher *ext.Dispatcher, config *LimiterConfig) *Limiter {
 	l := new(Limiter)
 
 	if config == nil {
-		config = &LimiterConfig{
-			ConsiderChannel:  false,
-			ConsiderUser:     true,
-			ConsiderEdits:    false,
-			IgnoreMediaGroup: true,
-			TextOnly:         false,
-			ConsiderInline:   true,
-			IsStrict:         false,
-		}
+		config = DefaultConfig
 	}
 
 	l.filter = l.limiterFilter
 	l.handler = l.limiterHandler
-	l.timeout = DEFAULT_TIME
-	l.punishment = DEFAULT_PUNISHMENT
-	l.maxCount = DEFAULT_COUNT
-	l.maxTimeout = DEFAULT_MAX_TIMEOUT
+	l.timeout = config.Timeout
+	l.punishment = config.PunishmentTime
+	l.maxCount = config.MessageCount
+	l.maxTimeout = config.MaxTimeout
 	l.IgnoreMediaGroup = config.IgnoreMediaGroup
 	l.TextOnly = config.TextOnly
 	l.ConsiderUser = config.ConsiderUser

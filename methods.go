@@ -27,7 +27,7 @@ func (l *Limiter) Start() {
 	}
 
 	if l.mutex == nil {
-		l.mutex = new(sync.Mutex)
+		l.mutex = new(sync.RWMutex)
 	}
 
 	if l.userMap == nil {
@@ -228,9 +228,9 @@ func (l *Limiter) SetAsExceptionList(list []int64) {
 // use the id of the chat to get the status.
 func (l *Limiter) GetStatus(id int64) *UserStatus {
 	var status *UserStatus
-	l.mutex.Lock()
+	l.mutex.RLock()
 	status = l.userMap[id]
-	l.mutex.Unlock()
+	l.mutex.RUnlock()
 
 	return status
 }
@@ -283,6 +283,8 @@ func (l *Limiter) SetMaxCacheDuration(d time.Duration) {
 
 func (l *Limiter) AddCustomIgnore(id int64, d time.Duration, ignoreExceptions bool) {
 	l.mutex.Lock()
+	defer l.mutex.Unlock()
+
 	status := l.userMap[id]
 	if status == nil {
 		status = new(UserStatus)
@@ -292,13 +294,13 @@ func (l *Limiter) AddCustomIgnore(id int64, d time.Duration, ignoreExceptions bo
 			ignoreException: ignoreExceptions,
 		}
 		l.userMap[id] = status
-		l.mutex.Unlock()
 		if ignoreExceptions {
 			l.addIgnoredExceptions(id)
 		}
+
 		return
 	}
-	l.mutex.Unlock()
+
 	status.custom = &customIgnore{
 		startTime:       time.Now(),
 		duration:        d,
@@ -311,8 +313,9 @@ func (l *Limiter) AddCustomIgnore(id int64, d time.Duration, ignoreExceptions bo
 
 func (l *Limiter) RemoveCustomIgnore(id int64) {
 	l.mutex.Lock()
+	defer l.mutex.Unlock()
+
 	status := l.userMap[id]
-	l.mutex.Unlock()
 	if status == nil || status.custom == nil {
 		return
 	}
@@ -331,6 +334,7 @@ func (l *Limiter) hasTextCondition(msg *gotgbot.Message) bool {
 	if l.TextOnly {
 		return len(msg.Text) > 0
 	}
+
 	return true
 }
 

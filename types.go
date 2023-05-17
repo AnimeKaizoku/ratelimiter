@@ -39,7 +39,7 @@ type customIgnore struct {
 
 // Limiter is the main struct of this library.
 type Limiter struct {
-	mutex *sync.Mutex
+	mutex *sync.RWMutex
 	// IsEnable will be true if and only if the limiter is enabled
 	// and should check for the incoming messages.
 	isEnabled bool
@@ -132,4 +132,8 @@ type LimiterConfig struct {
 	IsStrict         bool
 	HandlerGroups    []int
 	ConsiderInline   bool
+	Timeout          time.Duration
+	PunishmentTime   time.Duration
+	MaxTimeout       time.Duration
+	MessageCount     int
 }

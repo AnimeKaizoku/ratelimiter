@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AnimeKaizoku/ratelimiter/ratelimiter"
+	"github.com/AnimeKaizoku/ratelimiter"
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
