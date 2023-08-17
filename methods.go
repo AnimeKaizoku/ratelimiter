@@ -281,6 +281,14 @@ func (l *Limiter) SetMaxCacheDuration(d time.Duration) {
 	}
 }
 
+// SetDefaultInterval will set a default value to the checker's interval.
+// It's recommended that users use `SetMaxCacheDuration` method instead of this one.
+// If you haven't set any other parameters for the limiter, this will set the interval
+// to 60 seconds at least.
+func (l *Limiter) SetDefaultInterval() {
+	l.maxTimeout = l.punishment + l.timeout + time.Minute
+}
+
 func (l *Limiter) AddCustomIgnore(id int64, d time.Duration, ignoreExceptions bool) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
@@ -466,6 +474,12 @@ func (l *Limiter) removeFromIgnoredExceptions(id int64) {
 // from the cache using `l.maxTimeout` parameter.
 func (l *Limiter) checker() {
 	for l.isEnabled && !l.isStopped {
+		if l.maxTimeout < time.Second {
+			// if we don't do this, we will end up running an unlimited
+			// loop with highest possible speed (which will cause high
+			// cpu usage).
+			l.SetDefaultInterval()
+		}
 		time.Sleep(l.maxTimeout)
 
 		// added this checker just in-case so we can
@@ -512,7 +526,8 @@ func (s *UserStatus) IsCustomLimited() bool {
 }
 
 func (s *UserStatus) canBeDeleted(l *Limiter) bool {
-	return time.Since(s.Last) > l.timeout && !s.limited && !s.IsCustomLimited()
+	return s.Last.IsZero() ||
+		(time.Since(s.Last) > l.timeout && !s.limited && !s.IsCustomLimited())
 }
 
 //---------------------------------------------------------
